@@ -1,75 +1,64 @@
-# Sequential List vs Linked List — C++ Benchmark
+# Lista Sequencial vs Lista Encadeada — Benchmark em C++
 
-A hands-on comparison between two classic data structure implementations in C++ — an **array-based sequential list** and a **singly linked list** — both storing simple `Person` records (name + numeric ID). Each operation is instrumented to count **comparisons** and **movements**, and the project includes an automated benchmark with a comparison chart.
+Uma comparação prática entre duas implementações clássicas de estruturas de dados em C++ — uma lista sequencial baseada em array e uma lista simplesmente encadeada — ambas armazenando registros simples de `Person` (nome + ID numérico). Cada operação é instrumentada para contar comparações e movimentações, e o projeto inclui um benchmark automatizado com um gráfico comparativo.
 
-## Repository structure
+## Estrutura do repositório
 
 ```
 .
 ├── sequential-list/
-│   └── sequential_list.cpp   # Interactive CLI, array-based implementation
+│   └── sequential_list.cpp   # CLI interativa, implementação baseada em array
 ├── linked-list/
-│   └── linked_list.cpp       # Interactive CLI, pointer-based implementation
+│   └── linked_list.cpp       # CLI interativa, implementação baseada em ponteiros
 ├── benchmark/
-│   ├── benchmark_sequential.cpp  # Non-interactive cost measurement (sequential)
-│   ├── benchmark_linked.cpp      # Non-interactive cost measurement (linked)
-│   ├── plot_results.py           # Generates the comparison chart from results.csv
-│   ├── run_benchmark.sh          # Compiles, runs and plots everything in one step
-│   └── results.csv               # Latest benchmark output
+│   ├── benchmark_sequential.cpp  # Medição de custo não interativa (sequencial)
+│   ├── benchmark_linked.cpp      # Medição de custo não interativa (encadeada)
+│   ├── plot_results.py           # Gera o gráfico comparativo a partir de results.csv
+│   ├── run_benchmark.sh           # Compila, roda e plota tudo em um único passo
+│   └── results.csv               # Última saída do benchmark
 └── assets/
-    └── comparison_chart.png      # Generated chart (see below)
+    └── comparison_chart.png      # Gráfico gerado (veja abaixo)
 ```
 
-## The two implementations
+## As duas implementações
 
-### Sequential list (`sequential-list/`)
-A fixed-size array (`MAX_PEOPLE = 50`). Insertion and removal require shifting elements, so most operations cost `O(n)` in the worst case, but there's no per-node allocation overhead and iteration is cache-friendly.
+### Lista sequencial (`sequential-list/`)
+Um array de tamanho fixo (`MAX_PEOPLE = 50`). Inserção e remoção exigem deslocar elementos, então a maioria das operações custa `O(n)` no pior caso, mas não há sobrecarga de alocação por nó e a iteração é amigável ao cache.
 
-### Linked list (`linked-list/`)
-Dynamically allocated nodes (`struct Node`) connected via `next` pointers, with `head` and `tail` references. Insertion/removal at the start is `O(1)`; insertion/removal in the middle still requires traversal (`O(n)`). Because it's a **singly** linked list (no `prev` pointer), removing from the end also requires a full traversal — an interesting trade-off that shows up clearly in the benchmark below.
+### Lista encadeada (`linked-list/`)
+Nós alocados dinamicamente (`struct Node`) conectados por ponteiros `next`, com referências `head` e `tail`. Inserção/remoção no início é `O(1)`; inserção/remoção no meio ainda exige percorrer a lista (`O(n)`). Por ser uma lista simplesmente encadeada (sem ponteiro `prev`), remover do fim também exige uma travessia completa — um trade-off interessante que aparece claramente no benchmark abaixo.
 
-Both versions support:
-- Insert at start / middle / end
-- Remove from start / middle / end
-- Search by ID
-- Show list
-- Save/load from a text file
-- Per-operation counters for comparisons `C(n)` and movements `M(n)`, plus wall-clock time
+Ambas as versões suportam:
 
-## Benchmark results
+* Inserir no início / meio / fim
+* Remover do início / meio / fim
+* Buscar por ID
+* Exibir a lista
+* Salvar/carregar de um arquivo de texto
+* Contadores por operação para comparações `C(n)` e movimentações `M(n)`, além do tempo de execução
 
-The benchmark builds lists of increasing size (100 to 10,000 elements) and measures the comparison count for each operation. Run it yourself with:
+## Resultados do benchmark
 
-```bash
+O benchmark constrói listas de tamanho crescente (de 100 a 10.000 elementos) e mede o número de comparações para cada operação. Rode você mesmo com:
+
+```
 cd benchmark
 ./run_benchmark.sh
 ```
 
-![Comparison chart](assets/comparison_chart.png)
+O que o gráfico mostra:
 
-**What the chart shows:**
-- **Insert/remove at start**: the sequential list is `O(n)` (has to shift every element), the linked list is `O(1)` (constant, near zero).
-- **Insert/remove in the middle**: both are `O(n)` — the sequential list shifts elements, the linked list traverses pointers — and the cost is nearly identical.
-- **Insert at end**: the linked list is `O(1)` thanks to the `tail` pointer; the sequential list is also `O(1)` here since appending just means writing at `size`.
-- **Remove from end**: the sequential list is `O(1)` (just decrement `size`), but the linked list is `O(n)` — since it only keeps a `next` pointer, it has to walk the whole list to find the node *before* the last one.
-- **Search (worst case)**: identical cost for both, since neither structure supports faster-than-linear search on an unsorted list.
+* **Inserir/remover no início**: a lista sequencial é `O(n)` (precisa deslocar todos os elementos), a lista encadeada é `O(1)` (constante, próximo de zero).
+* **Inserir/remover no meio**: ambas são `O(n)` — a lista sequencial desloca elementos, a lista encadeada percorre ponteiros — e o custo é praticamente idêntico.
+* **Inserir no fim**: a lista encadeada é `O(1)` graças ao ponteiro `tail`; a lista sequencial também é `O(1)` aqui, já que inserir no fim significa apenas escrever na posição `size`.
+* **Remover do fim**: a lista sequencial é `O(1)` (basta decrementar `size`), mas a lista encadeada é `O(n)` — como ela só mantém um ponteiro `next`, precisa percorrer toda a lista para encontrar o nó anterior ao último.
+* **Busca (pior caso)**: custo idêntico para ambas, já que nenhuma das duas estruturas permite busca mais rápida que linear em uma lista não ordenada.
 
-This last point (remove from end) is a good illustration of why a **doubly** linked list is often preferred in practice when frequent end-removal is needed.
+Esse último ponto (remoção do fim) ilustra bem por que uma lista duplamente encadeada costuma ser preferida na prática quando há remoção frequente no fim.
 
-## How to compile and run the interactive programs
 
-```bash
-# Sequential list
-g++ -O2 -o sequential_list sequential-list/sequential_list.cpp
-./sequential_list
+Ambos leem/gravam seus dados de um arquivo local `IdName10.txt` no diretório de trabalho.
 
-# Linked list
-g++ -O2 -o linked_list linked-list/linked_list.cpp
-./linked_list
-```
+## Por que este projeto
 
-Both read/write their data from a local `IdName10.txt` file in the working directory.
-
-## Why this project
-
-Built as a study project for a Data Structures course, then cleaned up to make the trade-offs between contiguous and pointer-based storage visible and measurable rather than just theoretical.
+Desenvolvido como projeto de estudo para a disciplina de Estrutura de Dados, depois organizado para tornar visíveis e mensuráveis — em vez de apenas teóricos — os trade-offs entre armazenamento contíguo e baseado em ponteiros.
