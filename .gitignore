@@ -1,0 +1,20 @@
+# Compiled binaries
+*.exe
+*.out
+sequential_list
+linked_list
+
+# Object files
+*.o
+
+# Runtime-generated data files
+IdName10.txt
+
+# IDE
+.vscode/
+.vs/
+*.code-workspace
+
+# Python cache (if any tooling is added later)
+__pycache__/
+*.pyc
